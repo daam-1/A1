@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atmos — CO₂ Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFEFB;
+    --surface2: #EDEAE3;
+    --border: #DDD9D0;
+    --text: #1A1916;
+    --text-muted: #7A7669;
+    --accent: #2D5A27;
+    --accent-light: #4A8C41;
+    --accent-pale: #E8F0E7;
+    --danger: #C0392B;
+    --warn: #D4820A;
+    --warn-pale: #FBF0DC;
+    --danger-pale: #FAECEB;
+    --chart-1: #2D5A27;
+    --chart-2: #8FBE8A;
+    --chart-3: #C4DEC2;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--text);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 20px;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent-light);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+  }
+  .logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: -0.03em;
+  }
+
+  .nav-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A4840;
+    margin-bottom: 8px;
+    padding-left: 10px;
+  }
+  .nav-group { margin-bottom: 28px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #9A9890;
+    font-size: 0.9rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: #252420; color: #fff; }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid #252420;
+    padding-top: 20px;
+  }
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .user-card:hover { background: #252420; }
+  .avatar {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { color: #fff; font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { color: #4A4840; font-size: 0.75rem; }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+  }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+  .date-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .date-range:hover { border-color: var(--accent); color: var(--text); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-light); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+  /* CONTENT */
+  .content {
+    padding: 32px;
+    flex: 1;
+  }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: var(--warn-pale);
+    border: 1px solid #E8C06A;
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    animation: slideDown 0.4s ease;
+  }
+  .alert-banner.hidden { display: none; }
+  .alert-icon { font-size: 16px; }
+  .alert-text { flex: 1; font-size: 0.88rem; color: #8A5A0A; }
+  .alert-text strong { font-weight: 600; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.2s;
+  }
+  .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+
+  .stat-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+  .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .badge-down { background: var(--accent-pale); color: var(--accent); }
+  .badge-up { background: var(--danger-pale); color: var(--danger); }
+  .badge-neutral { background: var(--surface2); color: var(--text-muted); }
+
+  .stat-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* CHARTS ROW */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .card-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* BAR CHART */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 160px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+    cursor: pointer;
+  }
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: opacity 0.15s, transform 0.15s;
+    position: relative;
+  }
+  .bar-col:hover .bar { opacity: 0.8; transform: scaleY(1.03); transform-origin: bottom; }
+  .bar-main { background: var(--accent); }
+  .bar-prev { background: var(--chart-3); }
+  .bar-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-muted); }
+
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+
+  /* DONUT CHART */
+  .donut-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .donut-svg { margin-bottom: 16px; }
+  .donut-center {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .scope-list { width: 100%; }
+  .scope-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .scope-item:last-child { border-bottom: none; }
+  .scope-left { display: flex; align-items: center; gap: 10px; }
+  .scope-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .scope-name { font-size: 0.85rem; }
+  .scope-pct { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--text-muted); }
+
+  /* TABLE */
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-header {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    width: 220px;
+    cursor: text;
+    transition: border-color 0.15s;
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    width: 100%;
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    padding: 10px 24px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  td { padding: 14px 24px; font-size: 0.88rem; }
+  td:nth-child(3) { font-family: 'DM Mono', monospace; }
+  td:nth-child(4) { font-family: 'DM Mono', monospace; }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .status-on-track { background: var(--accent-pale); color: var(--accent); }
+  .status-at-risk { background: var(--warn-pale); color: var(--warn); }
+  .status-over { background: var(--danger-pale); color: var(--danger); }
+
+  .progress-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .fill-green { background: var(--accent); }
+  .fill-warn { background: var(--warn); }
+  .fill-danger { background: var(--danger); }
+  .progress-pct { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text-muted); width: 32px; text-align: right; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,25,22,0.5);
+    z-index: 200;
+    place-items: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: grid; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 32px;
+    width: 480px;
+    max-width: 90vw;
+    animation: modalIn 0.2s ease;
+    border: 1px solid var(--border);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+  .modal-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 0.82rem; font-weight: 500; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .tab {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* TOOLTIP */
+  .tooltip-container { position: relative; }
+  .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    font-family: 'DM Mono', monospace;
+  }
+  .bar-col:hover .tooltip { display: block; }
+
+  /* NOTIFICATION */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A7669' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🌿</div>
+    <span class="logo-text">Atmos</span>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Overview</div>
+    <button class="nav-item active" onclick="setPage(this, 'dashboard')">
+      <span class="nav-icon">◼</span> Dashboard
+    </button>
+    <button class="nav-item" onclick="setPage(this, 'analytics')">
+      <span class="nav-icon">◈</span> Analytics
+    </button>
+    <button class="nav-item" onclick="setPage(this, 'reports')">
+      <span class="nav-icon">◻</span> Reports
+    </button>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Emissions</div>
+    <button class="nav-item" onclick="setPage(this, 'sources')">
+      <span class="nav-icon">⬡</span> Sources
+    </button>
+    <button class="nav-item" onclick="setPage(this, 'offsets')">
+      <span class="nav-icon">◯</span> Offsets
+    </button>
+    <button class="nav-item" onclick="setPage(this, 'goals')">
+      <span class="nav-icon">◎</span> Goals
+    </button>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Settings</div>
+    <button class="nav-item" onclick="setPage(this, 'integrations')">
+      <span class="nav-icon">⬦</span> Integrations
+    </button>
+    <button class="nav-item" onclick="setPage(this, 'team')">
+      <span class="nav-icon">◉</span> Team
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card" onclick="showToast('Profile settings coming soon')">
+      <div class="avatar">AK</div>
+      <div class="user-info">
+        <div class="user-name">Alex Kim</div>
+        <div class="user-role">Sustainability Lead</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="page-title">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="tabs">
+        <button class="tab active" onclick="setTab(this, 'monthly')">Monthly</button>
+        <button class="tab" onclick="setTab(this, 'quarterly')">Quarterly</button>
+        <button class="tab" onclick="setTab(this, 'yearly')">Yearly</button>
+      </div>
+      <button class="date-range btn" onclick="showToast('Date picker opened')">
+        📅 Jan 2024 – Feb 2025
+      </button>
+      <button class="btn btn-outline" onclick="showToast('Report exported as PDF')">↓ Export</button>
+      <button class="btn btn-primary" onclick="openModal()">+ Log Emission</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ALERT -->
+    <div class="alert-banner" id="alertBanner">
+      <span class="alert-icon">⚠</span>
+      <span class="alert-text"><strong>Action Required:</strong> Scope 3 emissions for Q4 are 12% above target. Review fleet usage data to identify reduction opportunities.</span>
+      <button class="btn btn-ghost" style="font-size:0.8rem;padding:4px 10px;" onclick="dismissAlert()">Dismiss</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total CO₂e (YTD)</div>
+        <div class="stat-value">4,821</div>
+        <div class="stat-badge badge-down">↓ 8.4% vs last year</div>
+        <div class="stat-sub">metric tonnes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Scope 1 Direct</div>
+        <div class="stat-value">1,203</div>
+        <div class="stat-badge badge-down">↓ 3.1%</div>
+        <div class="stat-sub">on-site combustion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Scope 2 Indirect</div>
+        <div class="stat-value">892</div>
+        <div class="stat-badge badge-down">↓ 14.2%</div>
+        <div class="stat-sub">purchased electricity</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Scope 3 Value Chain</div>
+        <div class="stat-value">2,726</div>
+        <div class="stat-badge badge-up">↑ 2.8%</div>
+        <div class="stat-sub">supply chain &amp; travel</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <!-- Bar Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Monthly Emissions</div>
+            <div class="card-subtitle">CO₂e in metric tonnes · 2024 vs 2023</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:1rem; padding:4px 8px;" onclick="showToast('Expanded chart view')">⤢</button>
+        </div>
+        <div class="bar-chart" id="barChart"></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> 2024</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--chart-3)"></div> 2023</div>
+        </div>
+      </div>
+
+      <!-- Donut Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Emissions by Scope</div>
+            <div class="card-subtitle">% of total CO₂e</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="52" fill="none" stroke="var(--chart-3)" stroke-width="22" stroke-dasharray="327" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="52" fill="none" stroke="var(--chart-2)" stroke-width="22" stroke-dasharray="327" stroke-dashoffset="174" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="52" fill="none" stroke="var(--accent)" stroke-width="22" stroke-dasharray="327" stroke-dashoffset="234" transform="rotate(-90 70 70)"/>
+            <text x="70" y="66" text-anchor="middle" font-family="DM Serif Display, serif" font-size="18" fill="var(--text)">4,821</text>
+            <text x="70" y="82" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="9" fill="var(--text-muted)">tCO₂e total</text>
+          </svg>
+          <div class="scope-list">
+            <div class="scope-item">
+              <div class="scope-left">
+                <div class="scope-dot" style="background:var(--accent)"></div>
+                <span class="scope-name">Scope 1</span>
+              </div>
+              <span class="scope-pct">24.9%</span>
+            </div>
+            <div class="scope-item">
+              <div class="scope-left">
+                <div class="scope-dot" style="background:var(--chart-2)"></div>
+                <span class="scope-name">Scope 2</span>
+              </div>
+              <span class="scope-pct">18.5%</span>
+            </div>
+            <div class="scope-item">
+              <div class="scope-left">
+                <div class="scope-dot" style="background:var(--chart-3)"></div>
+                <span class="scope-name">Scope 3</span>
+              </div>
+              <span class="scope-pct">56.6%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <div>
+          <div class="card-title">Emission Sources</div>
+          <div class="card-subtitle">All tracked sources · Feb 2025</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" placeholder="Search sources..." oninput="filterTable(this.value)">
+          </div>
+          <button class="btn btn-outline" onclick="showToast('Filter options opened')">⚙ Filter</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th onclick="showToast('Sorted by Source')">Source ↕</th>
+            <th onclick="showToast('Sorted by Category')">Category ↕</th>
+            <th onclick="showToast('Sorted by CO₂e')">CO₂e (t) ↕</th>
+            <th onclick="showToast('Sorted by Change')">vs Last Mo. ↕</th>
+            <th>vs Target</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="emissionsTable">
+          <tr>
+            <td><strong>Natural Gas</strong></td>
+            <td>Scope 1</td>
+            <td>487.2</td>
+            <td style="color:var(--accent)">↓ 4.1%</td>
+            <td>
+              <div class="progress-bar-wrap">
+                <div class="progress-track"><div class="progress-fill fill-green" style="width:72%"></div></div>
+                <span class="progress-pct">72%</span>
+              </div>
+            </td>
+            <td><span class="status-pill status-on-track">● On track</span></td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:0.8rem;" onclick="showToast('Viewing Natural Gas details')">View →</button></td>
+          </tr>
+          <tr>
+            <td><strong>Fleet Vehicles</strong></td>
+            <td>Scope 1</td>
+            <td>316.8</td>
+            <td style="color:var(--danger)">↑ 7.2%</td>
+            <td>
+              <div class="progress-bar-wrap">
+                <div class="progress-track"><div class="progress-fill fill-danger" style="width:112%"></div></div>
+                <span class="progress-pct" style="color:var(--danger)">112%</span>
+              </div>
+            </td>
+            <td><span class="status-pill status-over">● Over limit</span></td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:0.8rem;" onclick="showToast('Viewing Fleet Vehicles details')">View →</button></td>
+          </tr>
+          <tr>
+            <td><strong>Electricity</strong></td>
+            <td>Scope 2</td>
+            <td>892.1</td>
+            <td style="color:var(--accent)">↓ 14.2%</td>
+            <td>
+              <div class="progress-bar-wrap">
+                <div class="progress-track"><div class="progress-fill fill-green" style="width:61%"></div></div>
+                <span class="progress-pct">61%</span>
+              </div>
+            </td>
+            <td><span class="status-pill status-on-track">● On track</span></td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:0.8rem;" onclick="showToast('Viewing Electricity details')">View →</button></td>
+          </tr>
+          <tr>
+            <td><strong>Business Travel</strong></td>
+            <td>Scope 3</td>
+            <td>1,024.4</td>
+            <td style="color:var(--warn)">↑ 2.1%</td>
+            <td>
+              <div class="progress-bar-wrap">
+                <div class="progress-track"><div class="progress-fill fill-warn" style="width:88%"></div></div>
+                <span class="progress-pct">88%</span>
+              </div>
+            </td>
+            <td><span class="status-pill status-at-risk">● At risk</span></td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:0.8rem;" onclick="showToast('Viewing Business Travel details')">View →</button></td>
+          </tr>
+          <tr>
+            <td><strong>Supply Chain</strong></td>
+            <td>Scope 3</td>
+            <td>1,701.5</td>
+            <td style="color:var(--danger)">↑ 3.4%</td>
+            <td>
+              <div class="progress-bar-wrap">
+                <div class="progress-track"><div class="progress-fill fill-danger" style="width:104%"></div></div>
+                <span class="progress-pct" style="color:var(--danger)">104%</span>
+              </div>
+            </td>
+            <td><span class="status-pill status-over">● Over limit</span></td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:0.8rem;" onclick="showToast('Viewing Supply Chain details')">View →</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-title">Log New Emission</div>
+    <div class="modal-sub">Add an emission record to your tracking dashboard.</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Company van #4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Scope</label>
+        <select class="form-input">
+          <option>Scope 1 — Direct</option>
+          <option>Scope 2 — Indirect</option>
+          <option>Scope 3 — Value Chain</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">CO₂e Amount (tonnes)</label>
+        <input class="form-input" type="number" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" type="date" value="2025-02-26">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-input">
+        <option>Combustion / Fuel</option>
+        <option>Fleet Vehicles</option>
+        <option>Electricity / Energy</option>
+        <option>Business Travel</option>
+        <option>Supply Chain</option>
+        <option>Waste &amp; Water</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" type="text" placeholder="Any additional context…">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEmission()">Save Emission</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastText">Report exported</span>
+</div>
+
+<script>
+  // Bar chart data
+  const months = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
+  const data2024 = [410, 395, 380, 365, 345, 330, 355, 375, 390, 415, 400, 380];
+  const data2023 = [450, 440, 425, 410, 400, 390, 405, 420, 430, 460, 445, 430];
+  const maxVal = Math.max(...data2024, ...data2023);
+
+  const chart = document.getElementById('barChart');
+  months.forEach((m, i) => {
+    const h24 = Math.round((data2024[i] / maxVal) * 140);
+    const h23 = Math.round((data2023[i] / maxVal) * 140);
+    chart.innerHTML += `
+      <div class="bar-col tooltip-container" style="gap:3px;">
+        <div class="tooltip">${m}: ${data2024[i]}t CO₂e</div>
+        <div style="display:flex;gap:2px;align-items:flex-end;height:140px;">
+          <div class="bar bar-main" style="height:${h24}px;width:12px;"></div>
+          <div class="bar bar-prev" style="height:${h23}px;width:12px;"></div>
+        </div>
+        <span class="bar-label">${m}</span>
+      </div>`;
+  });
+
+  // Toast
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // Alert
+  function dismissAlert() {
+    document.getElementById('alertBanner').classList.add('hidden');
+    showToast('Alert dismissed');
+  }
+
+  // Modal
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+  function submitEmission() {
+    closeModal();
+    showToast('✓ Emission logged successfully');
+  }
+
+  // Nav
+  function setPage(el, page) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelector('.page-title').textContent = el.textContent.trim().replace(/^./, '').trim();
+    showToast(`Navigated to ${el.textContent.trim()}`);
+  }
+
+  // Tabs
+  function setTab(el, period) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    showToast(`Switched to ${el.textContent} view`);
+  }
+
+  // Table filter
+  function filterTable(query) {
+    const rows = document.querySelectorAll('#emissionsTable tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
